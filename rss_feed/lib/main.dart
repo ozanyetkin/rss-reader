@@ -25,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final RssService rssService =
-      RssService('https://www.fotomac.com.tr/rss/futbol.xml');
+      RssService('https://www.futboo.com/rss_super-lig_42.xml');
 
   late Future<List<RssItem>> rssItems;
 
@@ -56,8 +56,10 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 final item = snapshot.data![index];
                 return ListTile(
-                  title: Text(item.title),
-                  subtitle: Text(item.description),
+                  title:
+                      Text(item.title, style: TextStyle(fontFamily: 'Roboto')),
+                  subtitle: Text(item.description,
+                      style: TextStyle(fontFamily: 'Roboto')),
                   onTap: () => _launchURL(item.link),
                 );
               },
