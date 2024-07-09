@@ -14,12 +14,14 @@ class RssService {
       var items = document.findAllElements('item');
       return items.map((item) {
         return RssItem(
-          title: item.findElements('title').single.innerText,
-          description: item.findElements('description').single.innerText,
-          link: item.findElements('link').single.innerText,
+          title: item.findElements('title').single.text,
+          description: item.findElements('description').single.text,
+          link: item.findElements('link').single.text,
         );
       }).toList();
     } else {
+      print('Error: ${response.statusCode}');
+      print('Response body: ${response.body}');
       throw Exception('Failed to load RSS feed');
     }
   }
