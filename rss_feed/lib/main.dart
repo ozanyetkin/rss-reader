@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'rss_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            print('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('No news found'));
@@ -55,12 +57,34 @@ class _HomePageState extends State<HomePage> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 final item = snapshot.data![index];
-                return ListTile(
-                  title:
-                      Text(item.title, style: TextStyle(fontFamily: 'Roboto')),
-                  subtitle: Text(item.description,
-                      style: TextStyle(fontFamily: 'Roboto')),
-                  onTap: () => _launchURL(item.link),
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (item.imageUrl.isNotEmpty)
+                        Image.network(item.imageUrl),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          item.title,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(item.description),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          onPressed: () => _launchURL(item.link),
+                          child: Text('Read more'),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -70,8 +94,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _launchURL(String url) {
-    // You can use a package like url_launcher to open the URL
-    // For example, url_launcher can be added to pubspec.yaml and used here
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      print('Could not launch $url');
+      throw 'Could not launch $url';
+    }
   }
 }

@@ -12,16 +12,25 @@ class RssService {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        // Decode the response body as UTF-8
         var decodedResponse = utf8.decode(response.bodyBytes);
-
         var document = xml.XmlDocument.parse(decodedResponse);
         var items = document.findAllElements('item');
         return items.map((item) {
+          String? imageUrl;
+          if (item.findElements('media:content').isNotEmpty) {
+            imageUrl =
+                item.findElements('media:content').first.getAttribute('url');
+          } else if (item.findElements('image').isNotEmpty) {
+            imageUrl = item.findElements('image').first.text;
+          } else if (item.findElements('enclosure').isNotEmpty) {
+            imageUrl = item.findElements('enclosure').first.getAttribute('url');
+          }
+
           return RssItem(
             title: item.findElements('title').single.text,
             description: item.findElements('description').single.text,
             link: item.findElements('link').single.text,
+            imageUrl: imageUrl ?? '',
           );
         }).toList();
       } else {
@@ -40,10 +49,12 @@ class RssItem {
   final String title;
   final String description;
   final String link;
+  final String imageUrl;
 
   RssItem({
     required this.title,
     required this.description,
     required this.link,
+    required this.imageUrl,
   });
 }
